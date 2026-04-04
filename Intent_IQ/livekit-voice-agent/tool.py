@@ -52,7 +52,6 @@ class CallTools:
                 Ignore the system metadata. Extract the actual conversation, clean it up, and analyze it.
                 
                 Output your findings STRICTLY as a JSON object. You must include exactly these keys to match our database and frontend schema:
-                - "id": (string) The unique identifier of the interaction let it be the mix of timestamp.
                 - "callerName": (string or null) The name of the caller, if they stated it. Otherwise null.
                 - "callerNumber": (string or null) Any phone number the caller referenced. If none, null.
                 - "organization": (string or null) The company or organization they are calling from, if provided.
@@ -82,7 +81,7 @@ class CallTools:
                 raw_json_string = response.choices[0].message.content
                 analysis_data = json.loads(raw_json_string) 
                 ist_time = datetime.now(ZoneInfo("Asia/Kolkata"))
-                analysis_data["created_at"] = ist_time
+                analysis_data["created_at"] = ist_time.isoformat()
                 
                 try:
     # Connect and insert directly
@@ -92,16 +91,11 @@ class CallTools:
                     logger.info("Successfully saved call analysis to MongoDB!")
                 except Exception as e:
                     logger.error(f"Failed to upload to MongoDB: {e}")
-                file_name = f"call_log_{job_ctx.room.name}.json"
-                with open(file_name, "w", encoding="utf-8") as json_file:
-                    json.dump(analysis_data, json_file, indent=4)
-                
-                logger.info(f"Successfully saved call analysis to {file_name}")
 
             except Exception as e:
                 logger.error(f"Failed to generate or save JSON analysis: {e}", exc_info=True)
 
-        transfer_to = "tel:+917566498544" 
+        transfer_to = "tel:+19895644297"
         
         # Find the SIP participant (the person calling in)
         sip_participant = None
@@ -169,7 +163,6 @@ class CallTools:
                 Ignore the system metadata. Extract the actual conversation, clean it up, and analyze it.
                 
                 Output your findings STRICTLY as a JSON object. You must include exactly these keys to match our database and frontend schema:
-                - "id": (string) The unique identifier of the interaction let it be the mix of timestamp.
                 - "callerName": (string or null) The name of the caller, if they stated it. Otherwise null.
                 - "callerNumber": (string or null) Any phone number the caller referenced. If none, null.
                 - "organization": (string or null) The company or organization they are calling from, if provided.
@@ -203,7 +196,7 @@ class CallTools:
                 
                 # Using ISO format makes it safely parsable by Javascript's `new Date()` in the frontend
                 ist_time = datetime.now(ZoneInfo("Asia/Kolkata"))
-                analysis_data["created_at"] = ist_time
+                analysis_data["created_at"] = ist_time.isoformat()
                 
                 try:
     # Connect and insert directly
@@ -213,11 +206,6 @@ class CallTools:
                     logger.info("Successfully saved call analysis to MongoDB!")
                 except Exception as e:
                     logger.error(f"Failed to upload to MongoDB: {e}")
-                file_name = f"call_log_{job_ctx.room.name}.json"
-                with open(file_name, "w", encoding="utf-8") as json_file:
-                    json.dump(analysis_data, json_file, indent=4)
-                
-                logger.info(f"Successfully saved call analysis to {file_name}")
 
             except Exception as e:
                 logger.error(f"Failed to generate or save JSON analysis: {e}", exc_info=True)
