@@ -5,9 +5,14 @@ from livekit.plugins import noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from tool import CallTools
 from prompt import AGENT_INSTRUCTIONS
+from livekit.plugins import deepgram, groq
+
+
+
 import logging
 logger = logging.getLogger("Nebula.py")
 load_dotenv(".env.local")
+
 class Assistant(agents.Agent):
     def __init__(self):
         self.my_tools = CallTools(agent=self)
@@ -19,9 +24,9 @@ async def entrypoint(ctx: agents.JobContext):
     participant = await ctx.wait_for_participant()
     logger.info(f"Phone call connected from participant: {participant.identity}")
     session = agents.AgentSession(
-        stt="assemblyai/universal-streaming:en",
-        llm="openai/gpt-4.1-mini",
-        tts="cartesia/sonic-2:9626c31c-bec5-4cca-baa8-f8ba9e84c8bc",
+        stt=deepgram.STT(),
+        llm=groq.LLM(model="llama-3.3-70b-versatile"),
+        tts=deepgram.TTS(),
         vad=silero.VAD.load(),
         turn_detection=MultilingualModel(),
     )
@@ -30,7 +35,7 @@ async def entrypoint(ctx: agents.JobContext):
                 agent=Assistant(),
                 room_input_options=RoomInputOptions(
                     # For telephony applications, use `BVCTelephony` instead for best results
-                    noise_cancellation=noise_cancellation.BVC(),
+                    noise_cancellation=noise_cancellation.BVCTelephony(),
                 ),
             )
     await session.generate_reply(
